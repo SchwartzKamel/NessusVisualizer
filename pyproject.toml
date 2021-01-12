@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "flask-learning"
+name = "NessusVisualizer"
 version = "0.1.0"
 description = ""
 authors = ["SchwartzKamel <lafiamafia@protonmail.com>"]
