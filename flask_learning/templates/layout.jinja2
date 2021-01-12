@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <title>
+    {% block title %}
+    {% endblock %}
+  </title>
+  <meta name="HandheldFriendly" content="True"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#5eb9d7"/>
+  <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon"/>
+  {% block styles %}
+  {% endblock %}
+  <script src="https://kit.fontawesome.com/e3deaeba31.js" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+  <!-- documentation at http://getbootstrap.com/docs/4.1/, alternative themes at https://bootswatch.com/ -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,500" rel="stylesheet">
+</head>
+
+<body class="{{ template }}">
+  <nav class="navbar navbar-expand-md navbar-light bg-light border">
+    <a class="navbar-brand" href="{{ url_for('main_bp.home') }}">Flask</a>
+    <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbar" data-toggle="collapse" type="button">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbar">
+        {% if session.user_id %}
+            <ul class="navbar-nav mr-auto mt-2">
+              <li class="nav-item"><a class="nav-link" href="/quote">Quote</a></li>
+              <li class="nav-item"><a class="nav-link" href="/buy">Buy</a></li>
+              <li class="nav-item"><a class="nav-link" href="/sell">Sell</a></li>
+            </ul>
+            <ul class="navbar-nav ml-auto mt-2">
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('main_bp.users') }}">Users</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('auth_bp.logout') }}">Log Out</a></li>
+            </ul>
+        {% else %}
+          <ul class="navbar-nav ml-auto mt-2">
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('auth_bp.register') }}">Register</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('auth_bp.login') }}">Log In</a></li>
+          </ul>
+        {% endif %}
+      </div>
+  </nav>
+  <div class="container">
+    {% block content %}
+    {% endblock %}
+  </div>
+</body>
+
+</html>
