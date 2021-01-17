@@ -1,5 +1,5 @@
 """App entry point."""
-from flask_learning import create_app
+from app import create_app
 
 app = create_app()
 
