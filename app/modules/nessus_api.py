@@ -230,7 +230,7 @@ class NessusAPI(object):
 
 # Validate login works
 if __name__ == '__main__':
-    # Define variables
+    # Define variables to test
     url = "https://SERVER_IP:8834"
     username = "USER_HERE"
     password = "PASSWORD_HERE"
