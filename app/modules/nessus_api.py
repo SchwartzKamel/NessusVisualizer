@@ -126,7 +126,7 @@ class NessusAPI(object):
         Get all of the scans for a specified folder
 
         Parameters:
-        folder_id (int): the id for the folder containing your scans (optional)
+        folder_id (int): the id for the folder containing your scans
         Returns:
         ret (list): a list of tuples (scan_id, scan_name)
         """
@@ -145,11 +145,8 @@ class NessusAPI(object):
         return response_text
 
     ### SCAN UTILS ###
-    def scans_list(self, folder_id=None, scan_id=None):
+    def scans_list(self, folder_id=None):
         path = '/scans'
-        if scan_id:
-            url = url + '/' + str(scan_id)
-
         payload = {}
 
         if folder_id:
