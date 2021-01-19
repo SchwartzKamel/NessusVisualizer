@@ -59,3 +59,69 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
+
+
+class NessusScanResults(db.Model):
+    """Data model for Nessus Scan Results"""
+
+    __tablename__ = 'scan_data'
+    plugin_id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+    cve = db.Column(
+        db.String(80),
+        index=False,
+        nullable=True
+    )
+    cvss = db.Column(
+        db.Integer,
+        index=False,
+        nullable=True
+    )
+    risk = db.Column(
+        db.String(80),
+        index=False,
+        nullable=True
+    )
+    host = db.Column(
+        db.Integer,
+        index=False,
+        nullable=True
+    )
+    protocol = db.Column()
+    port = db.Column(
+        db.Integer,
+        index=False,
+        nullable=True
+    )
+    name = db.Column(
+        db.String(200),
+        index=False,
+        nullable=True
+    )
+    synopsis = db.Column(
+        db.String(2147483647),
+        index=False,
+        nullable=True
+    )
+    description = db.Column(
+        db.String(2147483647),
+        index=False,
+        nullable=True
+    )
+    solution = db.Column(
+        db.String(2147483647),
+        index=False,
+        nullable=True
+    )
+    see_also = db.Column(
+        db.String(2147483647),
+        index=False,
+        nullable=True
+    )
+    plugin_output = db.Column(
+        db.String(2147483647),
+        index=False,
+        nullable=True
+    )
