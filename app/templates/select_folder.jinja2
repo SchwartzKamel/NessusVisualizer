@@ -1,0 +1,47 @@
+{% extends 'layout.jinja2' %}
+
+{% block title %}
+  Select Folder
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>Nessus Folders</h1>
+  {% for folder in folders %}
+    <ul id="folder.folders">
+      <li>
+        <span>ID:</span>
+        <span>{{ folders[folder]['ID']}}</span>
+    </ul>
+  {% endfor %}
+</div>
+<div class="formwrapper">
+
+  {% for message in get_flashed_messages() %}
+      <div class="alert alert-warning">
+        <button
+          type="button"
+          class="close"
+          data-dismiss="alert">
+          x
+        </button>
+        {{ message }}
+      </div>
+    {% endfor %}
+
+    <h2 class="title">Select Scan Folder</h2>
+
+    <form method="POST" action="/select_folder">
+      {{ form.csrf_token }}
+      <div class="form-field">
+      {{ form.scan_folder.label }}
+      {{ form.scan_folder(placeholder='Enter the folder ID') }}
+      </div>
+      {{ form.select }}
+    </form>
+</div>
+{% endblock %}

@@ -89,7 +89,11 @@ class NessusScanResults(db.Model):
         index=False,
         nullable=True
     )
-    protocol = db.Column()
+    protocol = db.Column(
+        db.String(12),
+        index=False,
+        nullable=True
+    )
     port = db.Column(
         db.Integer,
         index=False,
