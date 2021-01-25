@@ -30,5 +30,10 @@ def select_folder():
     form = FoldersForm()
     # GET
     folders = nessus.folders_list()
+    # Filter out name and ID of folders, then create a dict of that
     folders = folders['folders']
-    return render_template("select_folder.jinja2", form=form)
+    folder_id = [d['id'] for d in folders]
+    folder_name = [d['name'] for d in folders]
+
+    folder_info = {folder_id[i]: folder_name[i] for i in range(len(folder_id))}
+    return render_template("select_folder.jinja2", form=form, folder_info=folder_info)

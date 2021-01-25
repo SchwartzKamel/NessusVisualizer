@@ -9,15 +9,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div>
   <h1>Nessus Folders</h1>
-  {% for folder in folders %}
-    <ul id="folder.folders">
-      <li>
-        <span>ID:</span>
-        <span>{{ folders[folder]['ID']}}</span>
-    </ul>
-  {% endfor %}
+  <h4>{{folder_info}}</h4>
 </div>
 <div class="formwrapper">
 
