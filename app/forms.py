@@ -61,3 +61,14 @@ class FoldersForm(FlaskForm):
         ]
     )
     select = SubmitField('Select')
+
+
+class ScansForm(FlaskForm):
+    """Scan Selection Form"""
+    scan = IntegerField(
+        'ID',
+        validators=[
+            DataRequired()
+        ]
+    )
+    select = SubmitField('Select')

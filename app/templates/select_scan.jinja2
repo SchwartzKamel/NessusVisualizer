@@ -1,7 +1,7 @@
 {% extends 'layout.jinja2' %}
 
 {% block title %}
-  Select Folder
+  Select Scan
 {% endblock %}
 
 {% block styles %}
@@ -10,9 +10,9 @@
 
 {% block content %}
 <div>
-  <h1>Nessus Folders</h1>
-  <h4>ID : Folder Name</h4>
-  {% for key, value in folder_info.items() %}
+  <h1>Nessus Scans</h1>
+  <h4>ID : Scan Name</h4>
+  {% for key, value in scan_info.items() %}
     <h4>{{key}} : {{value}}</h4>
   {% endfor %}
 </div>
@@ -30,13 +30,13 @@
       </div>
     {% endfor %}
 
-    <h2 class="title">Select Scan Folder</h2>
+    <h2 class="title">Select Scan</h2>
 
-    <form method="POST" action="/select_folder">
+    <form method="POST" action="/select_scan">
       {{ form.csrf_token }}
       <div class="form-field">
-      {{ form.scan_folder.label }}
-      {{ form.scan_folder(placeholder='Enter the folder ID') }}
+      {{ form.scan.label }}
+      {{ form.scan(placeholder='Enter the scan ID') }}
       </div>
       {{ form.select }}
     </form>
