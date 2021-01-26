@@ -4,23 +4,9 @@ from wtforms.fields import (
     PasswordField,
     StringField,
     SubmitField,
-    TextAreaField,
+    IntegerField
 )
 from wtforms.validators import DataRequired, Email, EqualTo, Length
-
-
-class ContactForm(FlaskForm):
-    """Contact form."""
-
-    name = StringField("Name", [DataRequired()])
-    email = StringField(
-        "Email", [Email(message="Not a valid email address."), DataRequired()]
-    )
-    body = TextAreaField(
-        "Message", [DataRequired(), Length(
-            min=4, message="Your message is too short.")]
-    )
-    submit = SubmitField("Submit")
 
 
 class SignupForm(FlaskForm):
@@ -48,7 +34,7 @@ class SignupForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    """User Log-in Form."""
+    """Log in registered users."""
     username = StringField(
         'Username',
         validators=[
@@ -57,5 +43,32 @@ class LoginForm(FlaskForm):
             )
         ]
     )
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField(
+        'Password',
+        validators=[
+            DataRequired()
+        ]
+    )
     submit = SubmitField('Log In')
+
+
+class FoldersForm(FlaskForm):
+    """Scan Folder Selection Form"""
+    scan_folder = IntegerField(
+        'ID',
+        validators=[
+            DataRequired()
+        ]
+    )
+    select = SubmitField('Select')
+
+
+class ScansForm(FlaskForm):
+    """Scan Selection Form"""
+    scan = IntegerField(
+        'ID',
+        validators=[
+            DataRequired()
+        ]
+    )
+    select = SubmitField('Select')

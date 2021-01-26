@@ -27,12 +27,12 @@ class NessusAPI(object):
         return '{0}{1}'.format(self.url, resource)
 
     def connect(self, method: str, resource: str, data: dict = None, headers: dict = None):
-        """ 
+        """
         The connect method is used to connect to Nessus and pass our API calls.
         """
         if headers is None:
             headers = {'Content-type': 'application/json',
-                       'X-Cookie': str(self.token)}
+                       'X-Cookie': "token=" + str(self.token)}
         if data is not None:
             data = json.dumps(data)
         if method == "POST":
@@ -47,9 +47,6 @@ class NessusAPI(object):
         else:
             resp = requests.get(self.build_url(resource),
                                 data=data, headers=headers, verify=False)
-        if resp.status_code != 200:
-            e = resp.json()
-            sys.exit(e['error_msg'])
         return resp
 
     def login(self):
@@ -67,6 +64,16 @@ class NessusAPI(object):
         self.token = data.json()['token']
         return self.token
 
+    def get_session_token(self):
+        if not self.token:
+            token = self.login()
+            self.token = token
+
+        return self.token
+
+    def update_payload_token(self, dictionary):
+        dictionary['token'] = self.get_session_token()
+
     def logout(self):
         """
         Logs out of Nessus
@@ -74,12 +81,12 @@ class NessusAPI(object):
         data = self.connect('DELETE', '/session')
 
     ### CORE UTILS ###
-    def scans_export(self, scan_id, history_id, filename, status_interval=1, status_max=300, verbose=False):
+    def scans_export(self, scan_id, status_interval=1, status_max=300, verbose=False):
         """
         Parameters:
         status_interval: Wait n seconds before checking status again
         """
-        request = self.scans_export_request(scan_id, history_id)
+        request = self.scans_export_request(scan_id)
         file_id = request['file']
         # check for updates
         ready_status = False
@@ -100,20 +107,8 @@ class NessusAPI(object):
             status_check = status_check + 1
 
         download_response = self.scans_export_download(
-            scan_id, file_id, filename)
+            scan_id, file_id)
         return download_response
-
-    def download_file(self, url, filename):
-        payload = {}
-
-        with requests.get(url, params=payload, stream=True) as r:
-            r.raise_for_status()
-            with open(filename, 'wb') as f:
-                for chunk in r.iter_content(chunk_size=8192):
-                    if chunk:  # filter out keep-alive new chunks
-                        f.write(chunk)
-                        # f.flush()
-        return filename
 
     def get_scan_folders(self):
         """
@@ -122,16 +117,16 @@ class NessusAPI(object):
         Returns:
         ret (list): a list of tuples (folder_id, folder_name)
         """
-        folders_list = self.folders_list.json()
+        folders_list = self.folders_list
         ret = [(f['id'], f['name']) for f in folders_list['folders']]
         return ret
 
     def get_scan_ids(self, folder_id=None):
         """
-        Get all of the scans for a speficied folder
+        Get all of the scans for a specified folder
 
         Parameters:
-        folder_id (int): the id for the folder containing your scans (optional)
+        folder_id (int): the id for the folder containing your scans
         Returns:
         ret (list): a list of tuples (scan_id, scan_name)
         """
@@ -140,43 +135,24 @@ class NessusAPI(object):
                if not folder_id or f['folder_id'] == folder_id]
         return ret
 
-    def get_scan_history_ids(self, scan_id, completed=True):
-        """
-        Get all of the history ids for a specified scan
-        Parameters:
-        scan_id (int): id for the scan
-        completed (bool): only collect completed scans
-        Returns:
-        history (list): a list of tuples (history_id(int),timestamp:int)
-        """
-        scans_details = self.scans_details(scan_id)
-        if scans_details['history']:
-            history = [(f['history_id'], f['creation_date'])for f in scans_details['history']
-                       if not completed or f['status'] == 'completed']
-        else:
-            history = []
-        return history
-
     ### FOLDER UTILS ###
     def folders_list(self):
         path = '/folders'
         payload = {}
-
+        self.update_payload_token(payload)
         response = self.connect('GET', path, data=payload)
         response_text = json.loads(response.text)
         return response_text
 
     ### SCAN UTILS ###
-    def scans_list(self, folder_id=None, scan_id=None):
+    def scans_list(self, folder_id=None):
         path = '/scans'
-        if scan_id:
-            url = url + '/' + str(scan_id)
-
         payload = {}
 
         if folder_id:
             payload['folder_id'] = folder_id
 
+        self.update_payload_token(payload)
         response = self.connect('GET', path, data=payload)
         response_text = json.loads(response.text)
         return response_text
@@ -184,29 +160,41 @@ class NessusAPI(object):
     def scans_details(self, scan_id):
         return self.scans_list(scan_id=scan_id)
 
-    def scans_export_request(self, scan_id, history_id=None, format_type='csv'):
-        path = '/scans' + str(scan_id) + '/export'
-        if history_id:
-            path = path + '?history_id=' + str(history_id)
-
-        csvColumns = {"id": True, "cve": True, "cvss": True, "risk": True, "hostname": True, "protocol": True,
-                      "port": True, "plugin_name": True, "synopsis": True, "description": True, "solution": True,
-                      "see_also": True, "plugin_output": True, "stig_severity": True, "cvss3_base_score": True,
-                      "cvss_temporal_score": True, "cvss3_temporal_score": True, "risk_factor": True, "references": True,
-                      "plugin_information": True, "exploitable_with": True}
+    def scans_export_request(self, scan_id):
+        path = '/scans/' + str(scan_id) + '/export'
 
         # Build payload
-        data = '{"format":"csv","filter.search_type":"and","reportContents.formattingOptions.page_breaks":false,"reportContents.hostSections.scan_information":true,"reportContents.hostSections.host_information":true,"reportContents.vulnerabilitySections.synopsis":true,"reportContents.vulnerabilitySections.description":true,"reportContents.vulnerabilitySections.see_also":true,"reportContents.vulnerabilitySections.solution":true,"reportContents.vulnerabilitySections.risk_factor":true,"reportContents.vulnerabilitySections.cvss3_base_score":true,"reportContents.vulnerabilitySections.cvss3_temporal_score":true,"reportContents.vulnerabilitySections.cvss_base_score":true,"reportContents.vulnerabilitySections.cvss_temporal_score":true,"reportContents.vulnerabilitySections.stig_severity":true,"reportContents.vulnerabilitySections.references":true,"reportContents.vulnerabilitySections.exploitable_with":true,"reportContents.vulnerabilitySections.plugin_information":true,"reportContents.vulnerabilitySections.plugin_output":true}'
+        payload = {}
+        payload['format'] = "csv"
+        payload['filter.search_type'] = "and"
+        payload['reportContents.formattingOptions.page_breaks'] = False
+        payload['reportContents.hostSections.scan_information'] = False
+        payload['reportContents.hostSections.host_information'] = False
+        payload['reportContents.vulnerabilitySections.synopsis'] = False
+        payload['reportContents.vulnerabilitySections.description'] = False
+        payload['reportContents.vulnerabilitySections.see_also'] = False
+        payload['reportContents.vulnerabilitySections.solution'] = False
+        payload['reportContents.vulnerabilitySections.risk_factor'] = False
+        payload['reportContents.vulnerabilitySections.cvss3_base_score'] = False
+        payload['reportContents.vulnerabilitySections.cvss3_temporal_score'] = False
+        payload['reportContents.vulnerabilitySections.cvss_base_score'] = False
+        payload['reportContents.vulnerabilitySections.cvss_temporal_score'] = False
+        payload['reportContents.vulnerabilitySections.stig_severity'] = False
+        payload['reportContents.vulnerabilitySections.references'] = False
+        payload['reportContents.vulnerabilitySections.exploitable_with'] = False
+        payload['reportContents.vulnerabilitySections.plugin_information'] = False
+        payload['reportContents.vulnerabilitySections.plugin_output'] = False
 
         response = self.connect('POST', path, data=payload)
         response_text = json.loads(response.text)
         return response_text
 
     def scans_export_status(self, scan_id, file_id, simple=True):
-        path = '/scans' + '/' + str(scan_id) + '/export/' + \
+        path = '/scans/' + str(scan_id) + '/export/' + \
             str(file_id) + '/status'
 
         payload = {}
+        self.update_payload_token(payload)
         response = self.connect('GET', path, data=payload)
 
         state = json.loads(response.text)['status']
@@ -219,12 +207,13 @@ class NessusAPI(object):
         else:
             return response
 
-    def scans_export_download(self, scan_id, file_id, filename):
-        path = '/scans' + str(scan_id) + '/export/' + \
+    def scans_export_download(self, scan_id, file_id):
+        path = '/scans/' + str(scan_id) + '/export/' + \
             str(file_id) + '/download'
-        payload = {}
 
-        response = self.download_file(url, filename, data=payload)
+        payload = {}
+        self.update_payload_token(payload)
+        response = self.connect('GET', path)
         return response
 
 

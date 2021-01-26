@@ -38,6 +38,7 @@ coverage.xml
 *.cover 
 .hypothesis/ 
 app/tests
+
 # Translations
 *.mo
 *.pot
