@@ -17,9 +17,9 @@ nessus_bp = Blueprint(
 )
 
 # Define variables for Nessus API
-url = "https://10.0.0.137:8834"
-username = "nessusadmin"
-password = "admin"
+url = "https://<SERVER_IP>:8834"
+username = "<USER>"
+password = "<PASS>"
 
 # This calls the login function and passes it your credentials, no need to modify this.
 nessus = NessusAPI(url=url, username=username, password=password)
