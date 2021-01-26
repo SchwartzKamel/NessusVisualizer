@@ -1,6 +1,9 @@
 """Routes for Nessus API"""
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from flask_login import login_required
+from flask_sqlalchemy import SQLAlchemy
+import pandas as pd
+from io import StringIO
 from app.modules.nessus_api import NessusAPI
 from .forms import FoldersForm, ScansForm
 from .models import db, NessusScanResults
@@ -49,6 +52,11 @@ def select_folder():
 def select_scan():
     form = ScansForm()
     # POST
+    # Validate scan ID selection
+    if form.validate_on_submit():
+        # Get form fields
+        scan_choice = request.form.get('scan')
+        return redirect(url_for('nessus_bp.scan_results', scan_choice=scan_choice))
     # GET
     folder_choice = request.args['folder_choice']
     scans = nessus.scans_list(folder_id=folder_choice)
@@ -58,3 +66,22 @@ def select_scan():
 
     scan_info = {scan_id[i]: scan_name[i] for i in range(len(scan_id))}
     return render_template("select_scan.jinja2",  form=form, scan_info=scan_info, template="form-template")
+
+
+@nessus_bp.route("/scan_results", methods=("GET", "POST"))
+@login_required
+def scan_results():
+    # GET
+    # Download scan result data
+    scan_choice = request.args['scan_choice']
+    download = nessus.scans_export(scan_id=scan_choice)
+
+    # Convert to dataframe
+    df_scan = pd.read_csv(StringIO(download.text))
+    df_scan.to_sql(name='scan_data', con=db.engine,
+                   if_exists='replace', index=False)
+
+    # Query the scan data
+    # TODO read data from DB, currently df is passed in memory
+    # scan_data = db.session.query(NessusScanResults).all()
+    return render_template("scan_results.jinja2", scan_data=[df_scan.to_html(classes='data')])

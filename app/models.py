@@ -67,6 +67,8 @@ class NessusScanResults(db.Model):
     __tablename__ = 'scan_data'
     plugin_id = db.Column(
         db.Integer,
+        index=False,
+        nullable=False,
         primary_key=True
     )
     cve = db.Column(
