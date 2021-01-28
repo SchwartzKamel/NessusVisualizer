@@ -9,16 +9,14 @@
 {% endblock %}
 
 {% block content %}
-  <div>
-    <h1>Scan Results</h1>
-      <table class="scan-results">
-        <tbody>
-          {% for result in scan_data %}
-            <tr>
-              <td>{{ result }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-  </div>
+  <h1>Scan Results</h1>
+    <table class="scan-results">
+      <tbody>
+        {% for result in scan_data %}
+          <tr>
+            <td>{{ result }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 {% endblock %}

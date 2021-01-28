@@ -4,10 +4,14 @@ from flask_login import login_required
 from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
 from io import StringIO
+from os import environ
+from dotenv import load_dotenv, find_dotenv
 from app.modules.nessus_api import NessusAPI
 from .forms import FoldersForm, ScansForm
 from .models import db, NessusScanResults
 
+# Load variables from .env
+load_dotenv(find_dotenv())
 
 # Blueprint Configuration
 nessus_bp = Blueprint(
@@ -17,9 +21,9 @@ nessus_bp = Blueprint(
 )
 
 # Define variables for Nessus API
-url = "https://<SERVER_IP>:8834"
-username = "<USER>"
-password = "<PASS>"
+url = environ.get("NESSUS_URL")
+username = environ.get("NESSUS_USER")
+password = environ.get("NESSUS_PASS")
 
 # This calls the login function and passes it your credentials, no need to modify this.
 nessus = NessusAPI(url=url, username=username, password=password)
@@ -78,6 +82,7 @@ def scan_results():
 
     # Convert to dataframe
     df_scan = pd.read_csv(StringIO(download.text))
+    df_scan['Risk'] = df_scan['Risk'].replace(['None'], 'Info')
     df_scan.to_sql(name='scan_data', con=db.engine,
                    if_exists='replace', index=False)
 
