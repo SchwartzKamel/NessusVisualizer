@@ -8,7 +8,7 @@ from os import environ
 from dotenv import load_dotenv, find_dotenv
 from app.modules.nessus_api import NessusAPI
 from .forms import FoldersForm, ScansForm
-from .models import db, NessusScanResults
+from .models import db
 
 # Load variables from .env
 load_dotenv(find_dotenv())
@@ -60,7 +60,7 @@ def select_scan():
     if form.validate_on_submit():
         # Get form fields
         scan_choice = request.form.get('scan')
-        return redirect(url_for('nessus_bp.scan_results', scan_choice=scan_choice))
+        return redirect(url_for('nessus_bp.download_scan', scan_choice=scan_choice))
     # GET
     folder_choice = request.args['folder_choice']
     scans = nessus.scans_list(folder_id=folder_choice)
@@ -72,21 +72,28 @@ def select_scan():
     return render_template("select_scan.jinja2",  form=form, scan_info=scan_info, template="form-template")
 
 
-@nessus_bp.route("/scan_results", methods=("GET", "POST"))
+@nessus_bp.route("/download_scan", methods=("GET", "POST"))
 @login_required
-def scan_results():
+def download_scan():
     # GET
     # Download scan result data
     scan_choice = request.args['scan_choice']
     download = nessus.scans_export(scan_id=scan_choice)
 
-    # Convert to dataframe
+    # Convert to dataframe and write to db
     df_scan = pd.read_csv(StringIO(download.text))
     df_scan['Risk'] = df_scan['Risk'].replace(['None'], 'Info')
     df_scan.to_sql(name='scan_data', con=db.engine,
                    if_exists='replace', index=False)
 
+    return redirect(url_for("nessus_bp.scan_results"))
+
+
+@nessus_bp.route("/scan_results", methods=("GET", "POST"))
+@login_required
+def scan_results():
+    # GET
     # Query the scan data
-    # TODO read data from DB, currently df is passed in memory
+    df_scan_results = pd.read_sql_table(table_name='scan_data', con=db.engine)
     # scan_data = db.session.query(NessusScanResults).all()
-    return render_template("scan_results.jinja2", scan_data=[df_scan.to_html(classes='data')])
+    return render_template("scan_results.jinja2", column_names=df_scan_results.columns.values, row_data=list(df_scan_results.values.tolist()), zip=zip)
