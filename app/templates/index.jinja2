@@ -11,21 +11,23 @@
 {% block content %}
 <div class="container">
   <h1>Local Scan Results</h1>
-    <div class="card">
-    <div class="card-body">
-      {% for row in row_data %}
-      <tr>
-          {% for col, row_ in zip(column_names, row) %}
-          <h4 class="card-title">{{row_}}</h4>
-          {% endfor %}
-      </tr>
-      {% endfor %}
-      <p class="card-text">
-        Some quick example text to build on the card title
-        and make up the bulk of the card's content.
-      </p>
-      <a href="#!" class="btn btn-primary">Go somewhere</a>
-    </div>
+  <div class="card-deck">
+    {% for row in row_data %}
+      <div class="card">
+        <div class="card-body">
+          <tr>
+              {% for col, row_ in zip(column_names, row) %}
+              <h4 class="card-title">{{row_}}</h4>
+              {% endfor %}
+          </tr>
+          <p class="card-text">
+            Some quick example text to build on the card title
+            and make up the bulk of the card's content.
+          </p>
+          <a href="#!" class="btn btn-primary">Go somewhere</a>
+        </div>
+      </div>
+    {% endfor %}
   </div>
 </div>
 {% endblock %}
