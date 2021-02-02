@@ -23,9 +23,8 @@ def home():
         # Get selected host
         host = request.form.get("host")
 
-        sql = """SELECT * FROM scan_data WHERE host = ? """
-        df_results = pd.read_sql_query(sql, con=db.engine, params=[host])
-        return render_template("scan_results.jinja2", column_names=df_results.columns.values)
+        return redirect(url_for('main_bp.scan_results', host=host))
+
     # GET
     # Query the scan data
     df_scan_results = pd.read_sql(
@@ -41,6 +40,19 @@ def home():
     df_cpe = df_cpe.drop(['Plugin Output'], axis=1)
 
     return render_template("index.jinja2", hosts=df_scan_results.values, os_cpe=df_cpe.values, form=form)
+
+
+@main_bp.route("/scan_results")
+@login_required
+def scan_results():
+    # GET
+    host = request.args['host']
+
+    sql = """SELECT * FROM scan_data WHERE host = ? """
+
+    df_results = pd.read_sql_query(sql, con=db.engine, params=[host])
+
+    return render_template("scan_results.jinja2", column_names=df_results.columns.values)
 
 
 @main_bp.route("/users")
