@@ -12,13 +12,13 @@
 <div class="container">
   <h1>Scan Results</h1>
   <div>
-    {% for row in row_data %}
+    {% for host_info in hosts %}
       <div class="card">
         <div class="card-body">
           <tr>
-              {% for col, row_ in zip(column_names, row) %}
-              <h4 class="card-title">{{row_}}</h4>
-              {% endfor %}
+            {% for host_ip in host_info %}
+              <h4 class="card-title">{{host_ip}}</h4>
+            {% endfor %}
           </tr>
           <p class="card-text">
             {% if os_cpe %}
@@ -31,7 +31,15 @@
               Plugin 45590 - Common Platform Enumeration (CPE) not found in scan results
             {% endif %}
           </p>
-          <a href="#!" class="btn btn-primary">Go somewhere</a>
+          <form method="POST" action="/">
+            {{ form.csrf_token }}
+            <div class="form-field">
+            {{ form.hidden }}
+            {% for host_ip in host_info %}
+              <button type="submit" class="btn btn-primary" name="host" value={{host_ip}}>View Results</button>
+            {% endfor %}
+            </div>
+          </form>
         </div>
       </div>
     {% endfor %}

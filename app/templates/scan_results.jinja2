@@ -12,28 +12,10 @@
 <div class="container">
   <h1>Scan Results</h1>
   <div>
-    {% for row in row_data %}
-      <div class="card">
-        <div class="card-body">
-          <tr>
-              {% for col, row_ in zip(column_names, row) %}
-              <h4 class="card-title">{{row_}}</h4>
-              {% endfor %}
-          </tr>
-          <p class="card-text">
-            {% if os_cpe %}
-              {% for output in os_cpe %}
-                {% for os in output %}
-                  {{ os }}
-                {% endfor %}
-              {% endfor %}
-            {% else %}
-              Plugin 45590 - Common Platform Enumeration (CPE) not found in scan results
-            {% endif %}
-          </p>
-          <a href="#!" class="btn btn-primary">Go somewhere</a>
-        </div>
-      </div>
+    {% for header in column_names %}
+      <ul>
+        <li>{{header}}</li>
+      </ul>
     {% endfor %}
   </div>
 </div>

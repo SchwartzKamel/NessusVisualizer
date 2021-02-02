@@ -1,7 +1,8 @@
 """Route declaration."""
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_required
 import pandas as pd
+from .forms import ViewForm
 from .models import db, User
 
 
@@ -15,6 +16,16 @@ main_bp = Blueprint(
 
 @main_bp.route("/", methods=("GET", "POST"))
 def home():
+    form = ViewForm()
+    # POST
+    # Validate folder ID selection
+    if form.validate_on_submit():
+        # Get selected host
+        host = request.form.get("host")
+
+        sql = """SELECT * FROM scan_data WHERE host = ? """
+        df_results = pd.read_sql_query(sql, con=db.engine, params=[host])
+        return render_template("scan_results.jinja2", column_names=df_results.columns.values)
     # GET
     # Query the scan data
     df_scan_results = pd.read_sql(
@@ -29,7 +40,7 @@ def home():
     )
     df_cpe = df_cpe.drop(['Plugin Output'], axis=1)
 
-    return render_template("index.jinja2", column_names=df_scan_results.columns.values, row_data=list(df_scan_results.values.tolist()), zip=zip, os_cpe=df_cpe.values)
+    return render_template("index.jinja2", hosts=df_scan_results.values, os_cpe=df_cpe.values, form=form)
 
 
 @main_bp.route("/users")

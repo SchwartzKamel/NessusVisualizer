@@ -4,7 +4,8 @@ from wtforms.fields import (
     PasswordField,
     StringField,
     SubmitField,
-    IntegerField
+    IntegerField,
+    HiddenField
 )
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 
@@ -72,3 +73,8 @@ class ScansForm(FlaskForm):
         ]
     )
     select = SubmitField('Select')
+
+
+class ViewForm(FlaskForm):
+    """Select host to view scan results"""
+    hidden = HiddenField()
