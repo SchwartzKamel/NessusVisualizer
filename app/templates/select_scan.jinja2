@@ -9,36 +9,38 @@
 {% endblock %}
 
 {% block content %}
-<div>
-  <h1>Nessus Scans</h1>
-  <h4>ID : Scan Name</h4>
-  {% for key, value in scan_info.items() %}
-    <h4>{{key}} : {{value}}</h4>
-  {% endfor %}
-</div>
-<div class="formwrapper">
-
-  {% for message in get_flashed_messages() %}
-      <div class="alert alert-warning">
-        <button
-          type="button"
-          class="close"
-          data-dismiss="alert">
-          x
-        </button>
-        {{ message }}
-      </div>
+<div class="container">
+  <div>
+    <h1>Nessus Scans</h1>
+    <h4>ID : Scan Name</h4>
+    {% for key, value in scan_info.items() %}
+      <h4>{{key}} : {{value}}</h4>
     {% endfor %}
+  </div>
+  <div class="formwrapper">
 
-    <h2 class="title">Select Scan</h2>
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning">
+          <button
+            type="button"
+            class="close"
+            data-dismiss="alert">
+            x
+          </button>
+          {{ message }}
+        </div>
+      {% endfor %}
 
-    <form method="POST" action="/select_scan">
-      {{ form.csrf_token }}
-      <div class="form-field">
-      {{ form.scan.label }}
-      {{ form.scan(placeholder='Enter the scan ID') }}
-      </div>
-      {{ form.select }}
-    </form>
+      <h2 class="title">Select Scan</h2>
+
+      <form method="POST" action="/select_scan">
+        {{ form.csrf_token }}
+        <div class="form-field">
+        {{ form.scan.label }}
+        {{ form.scan(placeholder='Enter the scan ID') }}
+        </div>
+        {{ form.select }}
+      </form>
+  </div>
 </div>
 {% endblock %}

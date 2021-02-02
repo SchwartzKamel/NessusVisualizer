@@ -10,8 +10,8 @@
 
 {% block content %}
 <div class="container">
-  <h1>Local Scan Results</h1>
-  <div class="card-deck">
+  <h1>Scan Results</h1>
+  <div>
     {% for row in row_data %}
       <div class="card">
         <div class="card-body">
@@ -21,8 +21,15 @@
               {% endfor %}
           </tr>
           <p class="card-text">
-            Some quick example text to build on the card title
-            and make up the bulk of the card's content.
+            {% if os_cpe %}
+              {% for output in os_cpe %}
+                {% for os in output %}
+                  {{ os }}
+                {% endfor %}
+              {% endfor %}
+            {% else %}
+              Plugin 45590 - Common Platform Enumeration (CPE) not found in scan results
+            {% endif %}
           </p>
           <a href="#!" class="btn btn-primary">Go somewhere</a>
         </div>

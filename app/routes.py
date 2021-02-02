@@ -18,11 +18,21 @@ def home():
     # GET
     # Query the scan data
     df_scan_results = pd.read_sql(
-        "SELECT DISTINCT host FROM scan_data", con=db.engine)
-    return render_template("index.jinja2", template="home-template", column_names=df_scan_results.columns.values, row_data=list(df_scan_results.values.tolist()), zip=zip)
+        "SELECT DISTINCT host FROM scan_data", con=db.engine
+    )
+
+    df_cpe = pd.read_sql(
+        "SELECT `plugin output` FROM scan_data WHERE `plugin id`=45590", con=db.engine
+    )
+    df_cpe['OS'] = df_cpe['Plugin Output'].str.extract(
+        r'(cpe.+)'
+    )
+    df_cpe = df_cpe.drop(['Plugin Output'], axis=1)
+
+    return render_template("index.jinja2", column_names=df_scan_results.columns.values, row_data=list(df_scan_results.values.tolist()), zip=zip, os_cpe=df_cpe.values)
 
 
-@main_bp.route("/users", methods=("GET", "POST"))
+@main_bp.route("/users")
 @login_required
 def users():
     return render_template(

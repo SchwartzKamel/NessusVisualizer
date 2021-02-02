@@ -72,7 +72,7 @@ def select_scan():
     return render_template("select_scan.jinja2",  form=form, scan_info=scan_info, template="form-template")
 
 
-@nessus_bp.route("/download_scan", methods=("GET", "POST"))
+@nessus_bp.route("/download_scan")
 @login_required
 def download_scan():
     # GET
@@ -86,14 +86,4 @@ def download_scan():
     df_scan.to_sql(name='scan_data', con=db.engine,
                    if_exists='replace', index=False)
 
-    return redirect(url_for("nessus_bp.scan_results"))
-
-
-@nessus_bp.route("/scan_results", methods=("GET", "POST"))
-@login_required
-def scan_results():
-    # GET
-    # Query the scan data
-    df_scan_results = pd.read_sql_table(table_name='scan_data', con=db.engine)
-    # scan_data = db.session.query(NessusScanResults).all()
-    return render_template("scan_results.jinja2", column_names=df_scan_results.columns.values, row_data=list(df_scan_results.values.tolist()), zip=zip)
+    return redirect(url_for("main_bp.scan_results"))
