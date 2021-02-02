@@ -52,7 +52,7 @@ def scan_results():
 
     df_results = pd.read_sql_query(sql, con=db.engine, params=[host])
 
-    return render_template("scan_results.jinja2", column_names=df_results.columns.values)
+    return render_template("scan_results.jinja2", scan_data=df_results.values)
 
 
 @main_bp.route("/users")
