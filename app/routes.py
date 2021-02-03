@@ -47,7 +47,9 @@ def home():
 @login_required
 def scan_results():
     # GET
-    host = request.form.get('host')
+    # FIX THIS BUG
+    host = request.args['host']
+    # Logging to see the value TODO
 
     sql = """SELECT * FROM scan_data WHERE host = ? """
 

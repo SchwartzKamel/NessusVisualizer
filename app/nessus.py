@@ -86,4 +86,4 @@ def download_scan():
     df_scan.to_sql(name='scan_data', con=db.engine,
                    if_exists='replace', index=False)
 
-    return redirect(url_for("main_bp.scan_results"))
+    return redirect(url_for("main_bp.home"))
