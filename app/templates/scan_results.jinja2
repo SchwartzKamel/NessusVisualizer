@@ -9,25 +9,25 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-flex">
+<div class="container">
   <h1>Scan Results</h1>
   <div id="accordion">
-  {% for n in scan_data %}}
-  <div class="card">
-    <div class="card-header" id="pluginSeverity">
-      <h5 class="mb-0">
-        <button class="btn btn-link" data-toggle="collapse" data-target="#pluginID" aria-expanded="true" aria-controls="pluginID">
-          CARD TITLE INFORMATION GOES HERE
-        </button>
-      </h5>
-    </div>
-    <div id="pluginID" class="collapse show" aria-labelledby="pluginSeverity" data-parent="#accordion">
-      <div class="card-body">
-        CARD BODY INFORMATION GOES HERE
+  {% for data in scan_data %}}
+      <div class="card">
+        <div class="card-header" id="pluginSeverity">
+          <h5 class="mb-0">
+            <button class="btn btn-link" data-toggle="collapse" data-target="#pluginID" aria-expanded="true" aria-controls="pluginID">
+              Plugin ID : 
+            </button>
+          </h5>
+        </div>
+        <div id="pluginID" class="collapse show" aria-labelledby="pluginSeverity" data-parent="#accordion">
+        <div class="card-body">
+          
+        </div>
+        </div>
       </div>
-    </div>
-  </div>
   {% endfor %}
-</div>
+  </div>
 </div>
 {% endblock %}

@@ -15,6 +15,7 @@ main_bp = Blueprint(
 
 
 @main_bp.route("/", methods=("GET", "POST"))
+@login_required
 def home():
     form = ViewForm()
     # POST
@@ -46,11 +47,26 @@ def home():
 @login_required
 def scan_results():
     # GET
-    host = request.args['host']
+    host = request.form.get('host')
 
     sql = """SELECT * FROM scan_data WHERE host = ? """
 
     df_results = pd.read_sql_query(sql, con=db.engine, params=[host])
+
+    # Define data by column number in loops (view scan_results.jinja2 for example)
+    # 0 Plugin ID
+    # 1 CVE
+    # 2 CVSS
+    # 3 Risk
+    # 4 Host
+    # 5 Protocol
+    # 6 Port
+    # 7 Name
+    # 8 Synopsis
+    # 9 Description
+    # 10 Solution
+    # 11 See Also
+    # 12 Plugin Output
 
     return render_template("scan_results.jinja2", scan_data=df_results.values)
 

@@ -9,6 +9,7 @@
 {% endblock %}
 
 {% block content %}
+<div class="container">
 <div class="formwrapper">
 
   {% for message in get_flashed_messages() %}
@@ -56,5 +57,6 @@
         <span>Don't have an account?</span>
         <a href="{{ url_for('auth_bp.register') }}">Register</a>
       </div>
+</div>
 </div>
 {% endblock %}
