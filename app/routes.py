@@ -47,9 +47,7 @@ def home():
 @login_required
 def scan_results():
     # GET
-    # FIX THIS BUG
     host = request.args['host']
-    # Logging to see the value TODO
 
     sql = """SELECT * FROM scan_data WHERE host = ? """
 
@@ -70,11 +68,11 @@ def scan_results():
     # 11 See Also
     # 12 Plugin Output
 
-    return render_template("scan_results.jinja2", scan_data=df_results.values)
+    return render_template("scan_results.jinja2", scan_data=list(df_results.tolist()))
 
 
-@main_bp.route("/users")
-@login_required
+@ main_bp.route("/users")
+@ login_required
 def users():
     return render_template(
         'users.jinja2',

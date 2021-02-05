@@ -11,23 +11,26 @@
 {% block content %}
 <div class="container">
   <h1>Scan Results</h1>
-  <div id="accordion">
   {% for data in scan_data %}}
+  <div id="accordion">
       <div class="card">
-        <div class="card-header" id="pluginSeverity">
+        <div class="card-header" id="panel">
           <h5 class="mb-0">
-            <button class="btn btn-link" data-toggle="collapse" data-target="#pluginID" aria-expanded="true" aria-controls="pluginID">
-              Plugin ID : 
+            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+              Plugin ID : {{data.0}} - {{data.7}} | Port: {{data.6}} | CVE: {{data.1}} | CVSS: {{data.2}}
             </button>
           </h5>
         </div>
-        <div id="pluginID" class="collapse show" aria-labelledby="pluginSeverity" data-parent="#accordion">
+        <div id="collapseOne" class="collapse show" aria-labelledby="panel" data-parent="#accordion">
         <div class="card-body">
-          
+          <p>TL;DR: {{data.8}}</p>
+          <p>Description: {{data.9}}</p>
+          <p>Output: {{data.12}}</p>
+          <p>Solution: {{data.10}}</P>
         </div>
         </div>
       </div>
-  {% endfor %}
   </div>
+  {% endfor %}
 </div>
 {% endblock %}
