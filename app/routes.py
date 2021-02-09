@@ -53,6 +53,14 @@ def scan_results():
 
     df_results = pd.read_sql_query(sql, con=db.engine, params=[host])
 
+    # Sort data by severity (4-0) (Critical - Info)
+    df_results['Sort'] = 0
+    df_results.loc[df_results.Risk == "Low", "Sort"] = 1
+    df_results.loc[df_results.Risk == "Medium", "Sort"] = 2
+    df_results.loc[df_results.Risk == "High", "Sort"] = 3
+    df_results.loc[df_results.Risk == "Critical", "Sort"] = 4
+    df_results = df_results.sort_values('Sort', ascending=False)
+
     # Define data by column number in loops (view scan_results.jinja2 for example)
     # 0 Plugin ID
     # 1 CVE
