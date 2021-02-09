@@ -9,28 +9,47 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-flex">
   <h1>Scan Results</h1>
-  {% for data in scan_data %}}
-  <div id="accordion">
+  {% for data in scan_data %}
+    <div id="accordion-{{loop.index}}" role="tablist">
       <div class="card">
-        <div class="card-header" id="panel">
+        <div class="card-header" role="tab" id="heading-{{loop.index}}">
           <h5 class="mb-0">
-            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-              Plugin ID : {{data.0}} - {{data.7}} | Port: {{data.6}} | CVE: {{data.1}} | CVSS: {{data.2}}
-            </button>
+            <a data-toggle="collapse" href="#collapse-{{loop.index}}" aria-expanded="true" aria-controls="collapse-{{loop.index}}">
+              Plugin ID : {{data['Plugin ID']}} - {{data['Name']}} | Port: {{data['Port']}} | CVE: {{data['CVE']}} | CVSS: {{data['CVSS']}}
+            </a>
           </h5>
         </div>
-        <div id="collapseOne" class="collapse show" aria-labelledby="panel" data-parent="#accordion">
-        <div class="card-body">
-          <p>TL;DR: {{data.8}}</p>
-          <p>Description: {{data.9}}</p>
-          <p>Output: {{data.12}}</p>
-          <p>Solution: {{data.10}}</P>
-        </div>
+        <div id="collapse-{{loop.index}}" class="collapse" role="tabpanel" aria-labelledby="heading-{{loop.index}}" data-parent="#accordion-{{loop.index}}">
+          <div class="card-body">
+            <h5>TL;DR:</h5>
+            <p>{{data['Synopsis']}}</p>
+            <h5>Description:</h5>
+            <p>{{data['Description']}}</p>
+            <div id="accordion-{{loop.index}}-1" role="tablist">
+              <div class="card">
+                <div class="card-header" role="tab" id="heading-{{loop.index}}-1">
+                  <h5>
+                    <a data-toggle="collapse" href="#collapse-{{loop.index}}-1" aria-expanded="true" aria-controls="collapse-{{loop.index}}-1">
+                      Output:
+                    </a>
+                  </h5>
+                </div>
+              </div>
+            </div>
+            <div id="collapse-{{loop.index}}-1" class="collapse" role="tabpanel" aria-labelledby="heading-{{loop.index}}-1" data-parent="#accordion-{{loop.index}}-1">
+              <div class="card-body">
+                <p>{{data['Plugin Output']}}</p>
+              </div>
+            </div>
+            <p></p>
+            <h5>Solution:</h5>
+            <p>{{data['Solution']}}</P>
+          </div>
         </div>
       </div>
-  </div>
+    </div>
   {% endfor %}
 </div>
 {% endblock %}

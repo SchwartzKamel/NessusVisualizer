@@ -68,7 +68,7 @@ def scan_results():
     # 11 See Also
     # 12 Plugin Output
 
-    return render_template("scan_results.jinja2", scan_data=list(df_results.tolist()))
+    return render_template("scan_results.jinja2", scan_data=df_results.to_dict('records'))
 
 
 @ main_bp.route("/users")
