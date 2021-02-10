@@ -48,7 +48,7 @@ def select_folder():
     folder_name = [d['name'] for d in folders]
 
     folder_info = {folder_id[i]: folder_name[i] for i in range(len(folder_id))}
-    return render_template("select_folder.jinja2", form=form, folder_info=folder_info, template="form-template")
+    return render_template("select_folder.html", form=form, folder_info=folder_info, template="form-template")
 
 
 @nessus_bp.route("/select_scan", methods=("GET", "POST"))
@@ -69,7 +69,7 @@ def select_scan():
     scan_name = [d['name'] for d in scans]
 
     scan_info = {scan_id[i]: scan_name[i] for i in range(len(scan_id))}
-    return render_template("select_scan.jinja2",  form=form, scan_info=scan_info, template="form-template")
+    return render_template("select_scan.html",  form=form, scan_info=scan_info, template="form-template")
 
 
 @nessus_bp.route("/download_scan")

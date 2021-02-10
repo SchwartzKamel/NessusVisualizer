@@ -1,20 +1,13 @@
 // Run function on load
-window.onload = function(){
-
+window.addEventListener("load", function(){
   // Info
-  var info = document.getElementsByName("Info");
+  document.getElementsByName("Info").style.backgroundColor = '#0071B9';
   // Low
-  var low = document.getElementsByName("Low");
+  document.getElementsByName("Low").style.backgroundColor = '#3FAE49';
   // Medium
-  var medium = document.getElementsByName("Medium");
+  document.getElementsByName("Medium").style.backgroundColor = '#FDC431';
   // High
-  var high = document.getElementsByName("High");
+  document.getElementsByName("High").style.backgroundColor = '#EE9336';
   // Critical
-  var crit = document.getElementsByName("Critical");
-
-  info.style.backgroundColor = 'rgb(0, 113, 185)'
-  low.style.backgroundColor = 'rgb(63, 174, 73)'
-  medium.style.backgroundColor = 'rgb(253, 196, 49)'
-  high.style.backgroundColor = 'rgb(238, 147, 54)'
-  crit.style.backgroundColor = 'rgb(212, 63, 58)'
-}();
+  document.getElementsByName("Critical").style.backgroundColor = '#D43F3A';
+});
