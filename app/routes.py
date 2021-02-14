@@ -40,7 +40,7 @@ def home():
     )
     df_cpe = df_cpe.drop(['Plugin Output'], axis=1)
 
-    return render_template("index.jinja2", hosts=df_scan_results.values, os_cpe=df_cpe.values, form=form)
+    return render_template("index.html", hosts=df_scan_results.values, os_cpe=df_cpe.values, form=form)
 
 
 @main_bp.route("/scan_results")
@@ -53,7 +53,15 @@ def scan_results():
 
     df_results = pd.read_sql_query(sql, con=db.engine, params=[host])
 
-    # Define data by column number in loops (view scan_results.jinja2 for example)
+    # Sort data by severity (4-0) (Critical - Info)
+    df_results['Sort'] = 0
+    df_results.loc[df_results.Risk == "Low", "Sort"] = 1
+    df_results.loc[df_results.Risk == "Medium", "Sort"] = 2
+    df_results.loc[df_results.Risk == "High", "Sort"] = 3
+    df_results.loc[df_results.Risk == "Critical", "Sort"] = 4
+    df_results = df_results.sort_values('Sort', ascending=False)
+
+    # Define data by column number in loops (view scan_results.html for example)
     # 0 Plugin ID
     # 1 CVE
     # 2 CVSS
@@ -68,13 +76,13 @@ def scan_results():
     # 11 See Also
     # 12 Plugin Output
 
-    return render_template("scan_results.jinja2", scan_data=df_results.to_dict('records'))
+    return render_template("scan_results.html", scan_data=df_results.to_dict('records'))
 
 
 @ main_bp.route("/users")
 @ login_required
 def users():
     return render_template(
-        'users.jinja2',
+        'users.html',
         users=User.query.all()
     )

@@ -1,4 +1,4 @@
-{% extends 'layout.jinja2' %}
+{% extends 'layout.html' %}
 
 {% block title %}
   Scan Results
@@ -8,13 +8,17 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" type="text/css">
 {% endblock %}
 
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/severity-colors.js') }}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="container-flex">
   <h1>Scan Results</h1>
   {% for data in scan_data %}
     <div id="accordion-{{loop.index}}" role="tablist">
       <div class="card">
-        <div class="card-header" role="tab" id="heading-{{loop.index}}">
+        <div class="card-header" role="tab" id="heading-{{loop.index}}" name="{{data['Risk']}}">
           <h5 class="mb-0">
             <a data-toggle="collapse" href="#collapse-{{loop.index}}" aria-expanded="true" aria-controls="collapse-{{loop.index}}">
               Plugin ID : {{data['Plugin ID']}} - {{data['Name']}} | Port: {{data['Port']}} | CVE: {{data['CVE']}} | CVSS: {{data['CVSS']}}

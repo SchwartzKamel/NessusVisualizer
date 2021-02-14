@@ -40,7 +40,7 @@ def login():
         flash('Invalid username/password combination')
         return redirect(url_for('auth_bp.login'))
     # GET
-    return render_template("login.jinja2", form=form, template="form-template")
+    return render_template("login.html", form=form, template="form-template")
 
 
 @auth_bp.route("/register", methods=("GET", "POST"))
@@ -68,7 +68,7 @@ def register():
             db.session.commit()
             return redirect(url_for('auth_bp.login'))
     # GET
-    return render_template("signup.jinja2", form=form, template="form-template")
+    return render_template("signup.html", form=form, template="form-template")
 
 
 @auth_bp.route("/logout")

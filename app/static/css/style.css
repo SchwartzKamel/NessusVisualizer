@@ -46,3 +46,43 @@ li {
 .field-value {
   font-size: 0.9em;
 }
+
+.card-header.info {
+  background-color: #0071b9;
+}
+
+.card-header.info a {
+  color: black;
+}
+
+.card-header.low {
+  background-color: #3fae49;
+}
+
+.card-header.low a {
+  color: black;
+}
+
+.card-header.medium {
+  background-color: #fdc431;
+}
+
+.card-header.medium a {
+  color: black;
+}
+
+.card-header.high {
+  background-color: #ee9336;
+}
+
+.card-header.high a {
+  color: black;
+}
+
+.card-header.critical {
+  background-color: #d43f3a;
+}
+
+.card-header.critical a {
+  color: black;
+}
