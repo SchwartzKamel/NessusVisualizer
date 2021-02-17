@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-flex">
+<div class="container">
   <h1>Scan Results</h1>
   {% for data in scan_data %}
     <div id="accordion-{{loop.index}}" role="tablist">
@@ -27,25 +27,15 @@
         </div>
         <div id="collapse-{{loop.index}}" class="collapse" role="tabpanel" aria-labelledby="heading-{{loop.index}}" data-parent="#accordion-{{loop.index}}">
           <div class="card-body">
-            <h5>TL;DR:</h5>
+            <h5>Synopsis:</h5>
             <p>{{data['Synopsis']}}</p>
             <h5>Description:</h5>
-            <p>{{data['Description']}}</p>
-            <div id="accordion-{{loop.index}}-1" role="tablist">
-              <div class="card">
-                <div class="card-header" role="tab" id="heading-{{loop.index}}-1">
-                  <h5>
-                    <a data-toggle="collapse" href="#collapse-{{loop.index}}-1" aria-expanded="true" aria-controls="collapse-{{loop.index}}-1">
-                      Output:
-                    </a>
-                  </h5>
-                </div>
-              </div>
-            </div>
-            <div id="collapse-{{loop.index}}-1" class="collapse" role="tabpanel" aria-labelledby="heading-{{loop.index}}-1" data-parent="#accordion-{{loop.index}}-1">
-              <div class="card-body">
-                <p>{{data['Plugin Output']}}</p>
-              </div>
+            <p class="plugin-description">{{data['Description']}}</p>
+            <button type="button" class="btn btn-lg btn-info collapsed" data-toggle="collapse"
+              data-target="#output-{{loop.index}}">Plugin Output <span class="glyphicon glyphicon-collapse-down"></span></button>
+            <div id="output-{{loop.index}}" class="collapse">
+              <p></p>
+              <p class="plugin-output">{{data['Plugin Output']}}</p>
             </div>
             <p></p>
             <h5>Solution:</h5>

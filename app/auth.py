@@ -36,7 +36,7 @@ def login():
 
             # Send user back to the page they were on, or to users
             next_page = request.args.get('next')
-            return redirect(next_page or url_for('main_bp.users'))
+            return redirect(next_page or url_for('main_bp.home'))
         flash('Invalid username/password combination')
         return redirect(url_for('auth_bp.login'))
     # GET

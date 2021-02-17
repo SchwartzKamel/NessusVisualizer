@@ -1,5 +1,4 @@
-body {
-  background: #e1eaf5;
+body * {
   font-family: 'Poppins', sans-serif;
 }
 
@@ -19,6 +18,14 @@ nav .navbar-brand {
 h1 {
   margin: 0 0 30px;
   color: #475369;
+}
+
+.plugin-description {
+  white-space: pre-wrap;
+}
+
+.plugin-output {
+  white-space: pre-wrap;
 }
 
 ul:last-of-type {
