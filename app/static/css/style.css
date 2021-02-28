@@ -26,6 +26,10 @@ h1 {
 
 .plugin-output {
   white-space: pre-wrap;
+  display: block;
+  padding: 2rem;
+  background: #f5f5f5;
+  border-bottom: 1px dotted #ccc;
 }
 
 ul:last-of-type {
