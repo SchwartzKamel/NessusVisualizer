@@ -27,8 +27,6 @@ password = environ.get("NESSUS_PASS")
 
 # This calls the login function and passes it your credentials, no need to modify this.
 nessus = NessusAPI(url=url, username=username, password=password)
-token = nessus.login()
-
 
 @nessus_bp.route("/select_folder", methods=("GET", "POST"))
 @login_required
@@ -41,6 +39,7 @@ def select_folder():
         folder_choice = request.form.get('scan_folder')
         return redirect(url_for('nessus_bp.select_scan', folder_choice=folder_choice))
     # GET
+    token = nessus.login()
     folders = nessus.folders_list()
     # Filter out name and ID of folders, then create a dict of that
     folders = folders['folders']
@@ -86,4 +85,7 @@ def download_scan():
     df_scan.to_sql(name='scan_data', con=db.engine,
                    if_exists='replace', index=False)
 
+    # Destroy Nessus session
+    nessus.logout()
+    
     return redirect(url_for("main_bp.home"))
