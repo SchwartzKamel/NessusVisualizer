@@ -20,7 +20,7 @@ auth_bp = Blueprint(
 def login():
     # Bypass if user is logged in
     if current_user.is_authenticated:
-        return redirect(url_for('main_bp.user_records'))
+        return redirect(url_for('main_bp.home'))
 
     # POST
     form = LoginForm()

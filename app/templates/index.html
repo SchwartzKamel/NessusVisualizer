@@ -21,7 +21,7 @@
             {% endfor %}
           </tr>
           <p class="card-text">
-            {% if os_cpe %}
+            {% if os_cpe.any() %}
               {% for output in os_cpe %}
                 {% for os in output %}
                   {{ os }}
