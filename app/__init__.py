@@ -14,7 +14,7 @@ def create_app():
     app = Flask(__name__, instance_relative_config=False)
     # DevConfig for dev
     # ProdConfig for prod
-    app.config.from_object("config.DevConfig")
+    app.config.from_object("config.ProdConfig")
 
     # Initialize Plugins
     db.init_app(app)
