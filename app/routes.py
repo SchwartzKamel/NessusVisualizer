@@ -31,16 +31,18 @@ def home():
     df_scan_results = pd.read_sql(
         "SELECT DISTINCT host FROM scan_data", con=db.engine
     )
+    if df_scan_results.empty:
+        return redirect(url_for('nessus_bp.select_folder'))
+    else:
+        df_cpe = pd.read_sql(
+            "SELECT `plugin output` FROM scan_data WHERE `plugin id`=45590", con=db.engine
+        )
+        df_cpe['OS'] = df_cpe['Plugin Output'].str.extract(
+            r'(cpe.+)'
+        )
+        df_cpe = df_cpe.drop(['Plugin Output'], axis=1)
 
-    df_cpe = pd.read_sql(
-        "SELECT `plugin output` FROM scan_data WHERE `plugin id`=45590", con=db.engine
-    )
-    df_cpe['OS'] = df_cpe['Plugin Output'].str.extract(
-        r'(cpe.+)'
-    )
-    df_cpe = df_cpe.drop(['Plugin Output'], axis=1)
-
-    return render_template("index.html", hosts=df_scan_results.values, os_cpe=df_cpe.values, form=form)
+        return render_template("index.html", hosts=df_scan_results.values, os_cpe=df_cpe.values, form=form)
 
 
 @main_bp.route("/scan_results")
