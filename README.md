@@ -62,4 +62,5 @@ You can pass this project to Gunicorn 3, uWSGI, Waitress, etc. and for extending
 ## Usage
 
 End with an example of getting some data out of the system or using it for a little demo
+
 ![icon](app/static/img/favicon.ico)
