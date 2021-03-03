@@ -57,7 +57,7 @@ python wsgi.py
 
 ### Deployment
 
-You can pass this project to Gunicorn 3, uWSGI, Waitress, etc. and for extending testing, install tmux and start the server from there.
+You can pass this app to Gunicorn 3, uWSGI, Waitress, etc. and for extending usage, install tmux and start the server from there. When you disconnect the tmux session, the web app will be running in the background.
 
 ## Usage
 
