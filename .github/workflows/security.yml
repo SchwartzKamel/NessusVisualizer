@@ -12,10 +12,16 @@ on:
     # Run weekly on Sundays at midnight
     - cron: '0 0 * * 0'
 
+# Restrict permissions for security
+permissions:
+  contents: read
+
 jobs:
   dependency-check:
     name: Dependency Vulnerability Check
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -58,6 +64,8 @@ jobs:
   code-security:
     name: Code Security Analysis
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -100,6 +108,8 @@ jobs:
   container-security:
     name: Container Security Scan
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
