@@ -1,0 +1,132 @@
+# Security Scanning Workflow
+# Runs dependency checks and vulnerability scanning
+
+name: Security Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run weekly on Sundays at midnight
+    - cron: '0 0 * * 0'
+
+jobs:
+  dependency-check:
+    name: Dependency Vulnerability Check
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: |
+          uv venv
+          source .venv/bin/activate
+          uv pip install pip-audit safety
+
+      - name: Run pip-audit
+        run: |
+          source .venv/bin/activate
+          pip-audit -r requirements.txt --format json --output pip-audit-report.json || true
+        continue-on-error: true
+
+      - name: Run Safety check
+        run: |
+          source .venv/bin/activate
+          safety check -r requirements.txt --json --output safety-report.json || true
+        continue-on-error: true
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            pip-audit-report.json
+            safety-report.json
+
+  code-security:
+    name: Code Security Analysis
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install security tools
+        run: |
+          uv venv
+          source .venv/bin/activate
+          uv pip install bandit semgrep
+
+      - name: Run Bandit security linter
+        run: |
+          source .venv/bin/activate
+          bandit -r app/ -f json -o bandit-report.json -ll || true
+        continue-on-error: true
+
+      - name: Run Semgrep
+        run: |
+          source .venv/bin/activate
+          semgrep --config auto app/ --json --output semgrep-report.json || true
+        continue-on-error: true
+
+      - name: Upload code security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: code-security-reports
+          path: |
+            bandit-report.json
+            semgrep-report.json
+
+  container-security:
+    name: Container Security Scan
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: nessus-visualizer:security-scan
+          load: true
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'nessus-visualizer:security-scan'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+        continue-on-error: true
+
+      - name: Upload Trivy scan results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-results
+          path: trivy-results.sarif

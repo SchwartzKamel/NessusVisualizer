@@ -2,6 +2,10 @@
 
 Web application to visualize Nessus scan results in a concise, succinct fashion.
 
+[![CI/CD Pipeline](https://github.com/SchwartzKamel/NessusVisualizer/actions/workflows/ci.yml/badge.svg)](https://github.com/SchwartzKamel/NessusVisualizer/actions/workflows/ci.yml)
+[![Security Scan](https://github.com/SchwartzKamel/NessusVisualizer/actions/workflows/security.yml/badge.svg)](https://github.com/SchwartzKamel/NessusVisualizer/actions/workflows/security.yml)
+[![Docker Build](https://github.com/SchwartzKamel/NessusVisualizer/actions/workflows/docker.yml/badge.svg)](https://github.com/SchwartzKamel/NessusVisualizer/actions/workflows/docker.yml)
+
 Video Demo - [Here](https://youtu.be/8ZbkkKt7Sns)
 
 ## Getting Started
@@ -11,27 +15,84 @@ Video Demo - [Here](https://youtu.be/8ZbkkKt7Sns)
 This app was built with the following:
 
 ```
-Ubuntu 20.04
-Python 3.8
+Ubuntu 24.04 (or Docker)
+Python 3.12
 ```
 
 You will need to setup a [Nessus scanner](https://www.tenable.com/products/nessus), and have at least one scan result.
 
-Additionally, you will need to setup a [RedisLabs](https://redislabs.com/try-free/) account
+Additionally, you will need either:
+- A Redis instance (local or [Redis Cloud](https://redis.com/try-free/))
+- Docker and Docker Compose (recommended for easy setup)
 
-### Installing
+## Quick Start with Docker (Recommended)
 
-Clone the application (git clone or download and unpack the zip) and create your virtual environment (or install Poetry and use `poetry shell`)
+The easiest way to run NessusVisualizer is with Docker Compose:
 
-Install the dependencies
-
+1. Clone the repository:
+```bash
+git clone https://github.com/SchwartzKamel/NessusVisualizer.git
+cd NessusVisualizer
 ```
+
+2. Create a `.env` file with your configuration:
+```bash
+SECRET_KEY=your-secret-key-here
+NESSUS_URL=https://your-nessus-scanner:8834
+NESSUS_USER=your-nessus-username
+NESSUS_PASS=your-nessus-password
+```
+
+3. Start the application:
+```bash
+docker compose up -d
+```
+
+4. Access the application at `http://localhost:5000`
+
+### Docker Commands
+
+```bash
+# Start services
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Stop services
+docker compose down
+
+# Rebuild after changes
+docker compose up -d --build
+```
+
+## Manual Installation
+
+### Installing with uv (Recommended)
+
+[uv](https://github.com/astral-sh/uv) is a fast Python package manager:
+
+```bash
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create virtual environment and install dependencies
+uv venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
+```
+
+### Installing with pip
+
+Clone the application and create your virtual environment:
+
+```bash
 pip install -r requirements.txt
 ```
 
-Run the setup script
+Run the setup script:
 
-```
+```bash
 python setup.py
 ```
 
@@ -110,3 +171,43 @@ Additionally the 'Plugin Output' is on a toggle button as some plugins contain s
 Finally there is a section to view all registered users (more features utilizing this may be built upon, e.g. multiple users each able to analyze different scan results rather than sharing the singular result).
 
 ![scan_results](app/static/img/User_Records.png)
+
+## Development
+
+### Running Tests
+
+```bash
+# Install test dependencies
+uv pip install pytest pytest-cov pytest-flask
+
+# Run all tests
+python -m pytest tests/ -v
+
+# Run tests with coverage
+python -m pytest tests/ --cov=app --cov-report=term-missing
+```
+
+### Code Quality
+
+```bash
+# Install dev dependencies
+uv pip install ruff mypy
+
+# Run linter
+ruff check app/
+
+# Run formatter
+ruff format app/
+```
+
+## CI/CD
+
+This project uses GitHub Actions for continuous integration:
+
+- **CI/CD Pipeline**: Runs linting, tests, and Docker build on every push
+- **Security Scan**: Weekly vulnerability scanning with Safety, Bandit, and Trivy
+- **Docker Build**: Builds and publishes Docker images to GitHub Container Registry
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
