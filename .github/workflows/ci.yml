@@ -1,0 +1,231 @@
+# CI/CD Pipeline for NessusVisualizer
+# Runs on push and pull requests to main branch
+# Includes: linting, testing, security scanning, and Docker build validation
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Restrict permissions for security
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  # Job 1: Linting and Code Quality
+  lint:
+    name: Lint & Code Quality
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: |
+          uv venv
+          source .venv/bin/activate
+          uv pip install ruff mypy
+
+      - name: Run Ruff linter
+        run: |
+          source .venv/bin/activate
+          ruff check app/ --output-format=github || true
+
+      - name: Run Ruff formatter check
+        run: |
+          source .venv/bin/activate
+          ruff format --check app/ || true
+
+  # Job 2: Unit Tests
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-24.04
+    needs: lint
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: |
+          uv venv
+          source .venv/bin/activate
+          uv pip install -r requirements.txt
+          uv pip install pytest pytest-cov pytest-flask
+
+      - name: Run unit tests
+        env:
+          SECRET_KEY: test-secret-key
+          FLASK_APP: wsgi.py
+          SESSION_TYPE: filesystem
+          PROD_DATABASE_URI: sqlite:///:memory:
+          DEV_DATABASE_URI: sqlite:///:memory:
+          REDIS_URI: redis://localhost:6379
+        run: |
+          source .venv/bin/activate
+          python -m pytest tests/ -v --tb=short
+
+      - name: Run tests with coverage
+        env:
+          SECRET_KEY: test-secret-key
+          FLASK_APP: wsgi.py
+          SESSION_TYPE: filesystem
+          PROD_DATABASE_URI: sqlite:///:memory:
+          DEV_DATABASE_URI: sqlite:///:memory:
+          REDIS_URI: redis://localhost:6379
+        run: |
+          source .venv/bin/activate
+          python -m pytest tests/ --cov=app --cov-report=xml --cov-report=term-missing || true
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  # Job 3: Security Scanning
+  security:
+    name: Security Scan
+    runs-on: ubuntu-24.04
+    needs: lint
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: |
+          uv venv
+          source .venv/bin/activate
+          uv pip install safety bandit
+
+      - name: Run Safety check for vulnerabilities
+        run: |
+          source .venv/bin/activate
+          safety check -r requirements.txt --output text || true
+        continue-on-error: true
+
+      - name: Run Bandit security linter
+        run: |
+          source .venv/bin/activate
+          bandit -r app/ -f json -o bandit-report.json || true
+        continue-on-error: true
+
+      - name: Upload Bandit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bandit-security-report
+          path: bandit-report.json
+
+  # Job 4: Docker Build Validation
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-24.04
+    needs: [test, security]
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: nessus-visualizer:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Validate Docker Compose
+        run: |
+          docker compose config
+
+  # Job 5: Integration Tests (only on main branch)
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-24.04
+    needs: docker-build
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: |
+          uv venv
+          source .venv/bin/activate
+          uv pip install -r requirements.txt
+          uv pip install pytest pytest-flask
+
+      - name: Run integration tests
+        env:
+          SECRET_KEY: integration-test-secret
+          FLASK_APP: wsgi.py
+          SESSION_TYPE: redis
+          PROD_DATABASE_URI: sqlite:///:memory:
+          DEV_DATABASE_URI: sqlite:///:memory:
+          REDIS_URI: redis://localhost:6379
+        run: |
+          source .venv/bin/activate
+          python -m pytest tests/ -v --tb=short -m "not slow" || true

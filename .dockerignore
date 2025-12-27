@@ -1,0 +1,73 @@
+# Docker ignore file
+# Excludes files from Docker build context
+
+# Git
+.git
+.gitignore
+.github
+
+# IDE
+.vscode
+.idea
+*.sublime-*
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.egg-info
+.eggs
+*.egg
+.pytest_cache
+.coverage
+htmlcov
+.tox
+.mypy_cache
+.ruff_cache
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Build artifacts
+build/
+dist/
+*.manifest
+*.spec
+
+# Documentation (keep in container if needed)
+# docs/
+
+# Test files
+tests/
+pytest.ini
+conftest.py
+
+# Database files (don't include local databases)
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# macOS
+.DS_Store
+
+# Docker files (avoid recursive copying)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Poetry/uv lock files (using requirements.txt instead)
+poetry.lock
+uv.lock

@@ -37,7 +37,6 @@ nosetests.xml
 coverage.xml 
 *.cover 
 .hypothesis/ 
-app/tests
 
 # Translations
 *.mo
@@ -65,6 +64,9 @@ __pypackages__/
 env/
 venv/
 ENV/
+
+# Flask Session files
+flask_session/
 
 # If you are using PyCharm # 
 .idea/**/workspace.xml 

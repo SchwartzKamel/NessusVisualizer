@@ -1,0 +1,85 @@
+# NessusVisualizer Docker Compose - Redis Cluster Configuration
+# High availability setup with Redis Sentinel for automatic failover
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.cluster.yml up -d
+#
+# This extends the base docker-compose.yml with:
+# - Redis master-replica setup
+# - Redis Sentinel for automatic failover
+# - Multiple app replicas for load balancing
+
+services:
+  # Override the base Redis to be the master
+  redis:
+    container_name: nessus_redis_master
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+
+  # Redis replica for read operations and failover
+  redis-replica:
+    image: redis:7-alpine
+    container_name: nessus_redis_replica
+    restart: unless-stopped
+    command: redis-server --appendonly yes --replicaof redis 6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nessus_network
+
+  # Redis Sentinel for automatic failover
+  redis-sentinel:
+    image: redis:7-alpine
+    container_name: nessus_redis_sentinel
+    restart: unless-stopped
+    command: >
+      sh -c "echo 'sentinel monitor mymaster redis 6379 1' > /tmp/sentinel.conf &&
+             echo 'sentinel down-after-milliseconds mymaster 5000' >> /tmp/sentinel.conf &&
+             echo 'sentinel failover-timeout mymaster 10000' >> /tmp/sentinel.conf &&
+             echo 'sentinel parallel-syncs mymaster 1' >> /tmp/sentinel.conf &&
+             redis-sentinel /tmp/sentinel.conf"
+    depends_on:
+      redis:
+        condition: service_healthy
+      redis-replica:
+        condition: service_healthy
+    ports:
+      - "26379:26379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nessus_network
+
+  # Override app to include cluster info
+  # Note: REDIS_URI points to master for initial connection
+  # REDIS_SENTINEL_* vars are provided for future Sentinel-aware implementations
+  app:
+    environment:
+      - FLASK_APP=wsgi.py
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - PROD_DATABASE_URI=${PROD_DATABASE_URI:-sqlite:////app/nessus_visualizer.db}
+      - SESSION_TYPE=redis
+      # Primary Redis connection (master node)
+      - REDIS_URI=redis://redis:6379/0
+      # Sentinel config for future HA-aware implementations
+      - REDIS_SENTINEL_MASTER=mymaster
+      - REDIS_SENTINEL_HOSTS=redis-sentinel:26379
+      - NESSUS_URL=${NESSUS_URL}
+      - NESSUS_USER=${NESSUS_USER}
+      - NESSUS_PASS=${NESSUS_PASS}
+    depends_on:
+      redis:
+        condition: service_healthy
+      redis-replica:
+        condition: service_healthy
+      redis-sentinel:
+        condition: service_healthy
