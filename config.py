@@ -14,7 +14,7 @@ def get_redis_connection():
         try:
             import redis
             return redis.from_url(redis_uri)
-        except Exception:
+        except (redis.ConnectionError, redis.TimeoutError, ImportError):
             return None
     return None
 
@@ -62,6 +62,6 @@ class DockerConfig(Config):
     TESTING = False
     SQLALCHEMY_DATABASE_URI = environ.get('PROD_DATABASE_URI', 'sqlite:////app/nessus_visualizer.db')
     SQLALCHEMY_ECHO = False
-    
+
     # Redis is required in Docker environment
     SESSION_TYPE = 'redis'

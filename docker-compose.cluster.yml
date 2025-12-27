@@ -58,7 +58,9 @@ services:
     networks:
       - nessus_network
 
-  # Override app to use Redis Sentinel
+  # Override app to include cluster info
+  # Note: REDIS_URI points to master for initial connection
+  # REDIS_SENTINEL_* vars are provided for future Sentinel-aware implementations
   app:
     environment:
       - FLASK_APP=wsgi.py
@@ -66,7 +68,9 @@ services:
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
       - PROD_DATABASE_URI=${PROD_DATABASE_URI:-sqlite:////app/nessus_visualizer.db}
       - SESSION_TYPE=redis
+      # Primary Redis connection (master node)
       - REDIS_URI=redis://redis:6379/0
+      # Sentinel config for future HA-aware implementations
       - REDIS_SENTINEL_MASTER=mymaster
       - REDIS_SENTINEL_HOSTS=redis-sentinel:26379
       - NESSUS_URL=${NESSUS_URL}
