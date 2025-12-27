@@ -66,6 +66,27 @@ docker compose down
 docker compose up -d --build
 ```
 
+### Redis Cluster Mode (High Availability)
+
+For production environments requiring high availability, use the cluster configuration:
+
+```bash
+# Start with Redis cluster (master + replica + sentinel)
+docker compose -f docker-compose.yml -f docker-compose.cluster.yml up -d
+
+# View cluster status
+docker exec nessus_redis_master redis-cli info replication
+docker exec nessus_redis_sentinel redis-cli -p 26379 sentinel master mymaster
+
+# Monitor failover
+docker compose -f docker-compose.yml -f docker-compose.cluster.yml logs -f redis-sentinel
+```
+
+The cluster configuration provides:
+- **Redis Master**: Primary read/write node
+- **Redis Replica**: Read-only replica for failover
+- **Redis Sentinel**: Monitors and handles automatic failover
+
 ## Manual Installation
 
 ### Installing with uv (Recommended)

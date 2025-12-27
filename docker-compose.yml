@@ -11,6 +11,7 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -34,12 +35,13 @@ services:
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
       - PROD_DATABASE_URI=${PROD_DATABASE_URI:-sqlite:////app/nessus_visualizer.db}
       - SESSION_TYPE=redis
-      - REDIS_URI=redis://redis:6379
+      - REDIS_URI=redis://redis:6379/0
       - NESSUS_URL=${NESSUS_URL}
       - NESSUS_USER=${NESSUS_USER}
       - NESSUS_PASS=${NESSUS_PASS}
     volumes:
       - app_data:/app/data
+      - db_data:/app/instance
     depends_on:
       redis:
         condition: service_healthy
@@ -47,7 +49,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:5000/login"]
       interval: 30s
       timeout: 10s
-      start_period: 10s
+      start_period: 15s
       retries: 3
     networks:
       - nessus_network
@@ -56,6 +58,8 @@ volumes:
   redis_data:
     driver: local
   app_data:
+    driver: local
+  db_data:
     driver: local
 
 networks:
