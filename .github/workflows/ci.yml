@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [master, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Unit Tests
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Sync Python environment
+        run: uv sync --frozen
+
+      - name: Run pytest
+        env:
+          SECRET_KEY: test-secret-key
+          FLASK_APP: wsgi.py
+          SESSION_TYPE: filesystem
+          PROD_DATABASE_URI: sqlite:////tmp/nessus-visualizer-test.db
+          DEV_DATABASE_URI: sqlite:////tmp/nessus-visualizer-test.db
+          REDIS_URI: redis://localhost:6379/0
+          NESSUS_URL: https://nessus.local:8834
+          NESSUS_USER: testuser
+          NESSUS_PASS: testpass
+          NESSUS_VERIFY_SSL: "false"
+        run: uv run pytest -q
+
+  container-smoke:
+    name: Podman Smoke Test
+    runs-on: ubuntu-24.04
+    needs: tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+
+      - name: Build image
+        run: podman build --isolation chroot -t nessus-visualizer:ci -f Containerfile .
+
+      - name: Run login probe
+        run: |
+          podman run -d --name nessus-visualizer-ci -p 5000:5000 \
+            -e SECRET_KEY=test-secret-key \
+            -e NESSUS_VERIFY_SSL=false \
+            nessus-visualizer:ci
+          sleep 5
+          curl -fsS http://127.0.0.1:5000/login >/dev/null
+
+      - name: Cleanup
+        if: always()
+        run: podman rm -f nessus-visualizer-ci || true

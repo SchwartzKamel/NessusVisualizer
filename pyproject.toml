@@ -1,15 +1,27 @@
-[tool.poetry]
-name = "NessusVisualizer"
+[project]
+name = "nessus-visualizer"
 version = "0.1.0"
-description = ""
-authors = ["SchwartzKamel <lafiamafia@protonmail.com>"]
+description = "Web application to visualize Nessus scan results."
+readme = "README.md"
+requires-python = ">=3.14,<3.15"
+dependencies = [
+    "email-validator>=2.2.0,<3",
+    "flask>=3.1.1,<4",
+    "flask-login>=0.6.3,<1",
+    "flask-session>=0.8.0,<1",
+    "flask-sqlalchemy>=3.1.1,<4",
+    "flask-wtf>=1.2.2,<2",
+    "pandas>=2.2.2,<3",
+    "python-dotenv>=1.0.1,<2",
+    "redis>=5.0.7,<6",
+    "requests>=2.32.4,<3",
+    "waitress>=3.0.2,<4",
+]
 
-[tool.poetry.dependencies]
-python = "^3.8"
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5,<9",
+]
 
-[tool.poetry.dev-dependencies]
-pytest = "^5.2"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.uv]
+package = false

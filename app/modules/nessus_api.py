@@ -14,10 +14,11 @@ class NessusAPI(object):
     url_pull_scan = None
 
     ### CONNECTION ###
-    def __init__(self, username: str, password: str, url: str):
+    def __init__(self, username: str, password: str, url: str, verify_ssl: bool = False):
         self.username = username
         self.password = password
         self.url = url
+        self.verify_ssl = verify_ssl
         self.token = None
 
     def build_url(self, resource):
@@ -37,16 +38,16 @@ class NessusAPI(object):
             data = json.dumps(data)
         if method == "POST":
             resp = requests.post(self.build_url(resource),
-                                 data=data, headers=headers, verify=False)
+                                 data=data, headers=headers, verify=self.verify_ssl)
         elif method == "DELETE":
             resp = requests.delete(self.build_url(
-                resource), data=data, headers=headers, verify=False)
+                resource), data=data, headers=headers, verify=self.verify_ssl)
         elif method == 'PATCH':
             resp = requests.patch(self.build_url(resource),
-                                  data=data, headers=headers, verify=False)
+                                  data=data, headers=headers, verify=self.verify_ssl)
         else:
             resp = requests.get(self.build_url(resource),
-                                data=data, headers=headers, verify=False)
+                                data=data, headers=headers, verify=self.verify_ssl)
         return resp
 
     def login(self):
@@ -117,7 +118,7 @@ class NessusAPI(object):
         Returns:
         ret (list): a list of tuples (folder_id, folder_name)
         """
-        folders_list = self.folders_list
+        folders_list = self.folders_list()
         ret = [(f['id'], f['name']) for f in folders_list['folders']]
         return ret
 
@@ -213,7 +214,7 @@ class NessusAPI(object):
 
         payload = {}
         self.update_payload_token(payload)
-        response = self.connect('GET', path)
+        response = self.connect('GET', path, data=payload)
         return response
 
 

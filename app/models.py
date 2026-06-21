@@ -51,11 +51,7 @@ class User(UserMixin, db.Model):
 
     def set_password(self, password):
         """Create hashed password."""
-        self.password_hash = generate_password_hash(
-            password,
-            method='sha256',
-            salt_length=8
-        )
+        self.password_hash = generate_password_hash(password)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)

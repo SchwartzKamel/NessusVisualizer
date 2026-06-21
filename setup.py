@@ -4,25 +4,25 @@ import os
 
 def env_writer(setting_name, question):
     user_input = input(question)
-    environment.write(setting_name + "=" + user_input)
+    environment.write(setting_name + "=" + user_input + "\n")
 
 
 def env_db_writer(setting_name, question):
     user_input = input(question)
-    environment.write(setting_name + "=sqlite:///" + user_input)
+    environment.write(setting_name + "=sqlite:///" + user_input + "\n")
 
 
 with open(".env", 'w') as environment:
     # SECRET_KEY
-    key = os.urandom(16)
-    environment.write("SECRET_KEY=" + key)
+    key = os.urandom(32).hex()
+    environment.write("SECRET_KEY=" + key + "\n")
     # FLASK_APP
-    environment.write("FLASK_APP=wsgi.py")
+    environment.write("FLASK_APP=wsgi.py\n")
     # PROD_DATABASE_URI
     env_db_writer("PROD_DATABASE_URI",
                   "What is the path to the prod database?")
     # SESSION_TYPE
-    environment.write("SESSION_TYPE=redis")
+    environment.write("SESSION_TYPE=redis\n")
     # REDIS_URI
     env_writer("REDIS_URI", "What is your Redis URI?")
     # NESSUS_URL

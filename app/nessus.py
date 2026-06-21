@@ -26,7 +26,8 @@ username = environ.get("NESSUS_USER")
 password = environ.get("NESSUS_PASS")
 
 # This calls the login function and passes it your credentials, no need to modify this.
-nessus = NessusAPI(url=url, username=username, password=password)
+verify_ssl = environ.get("NESSUS_VERIFY_SSL", "false").lower() in {"1", "true", "yes"}
+nessus = NessusAPI(url=url, username=username, password=password, verify_ssl=verify_ssl)
 
 @nessus_bp.route("/select_folder", methods=("GET", "POST"))
 @login_required
