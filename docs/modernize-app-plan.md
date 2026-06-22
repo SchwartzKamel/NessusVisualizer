@@ -6,15 +6,15 @@ This document outlines the plan to modernize the application infrastructure and 
 
 ---
 
-## 1. Containerization with Docker
+## 1. Containerization with Podman (OCI)
 
 **Rationale:**  
-Containerizing the application with Docker will ensure consistent environments across development, testing, and production. It simplifies deployment and scaling.
+Containerizing the application with a hardened OCI image ensures consistent environments across development, testing, and production while improving security posture.
 
 **Implementation Steps:**  
-- Create a `Dockerfile` for the application.
-- Set up Docker Compose for multi-service orchestration if needed.
-- Update documentation to include Docker usage instructions.
+- Create a secure `Containerfile` based on `ubuntu:24.04`.
+- Run as a non-root user and include health checks + explicit entrypoint.
+- Update documentation to include Podman build/run usage instructions.
 
 **Timeline:**  
 - Week 1: Draft and test Dockerfile.
@@ -27,13 +27,13 @@ Containerizing the application with Docker will ensure consistent environments a
 
 ---
 
-## 2. Upgrade to Python 3.12
+## 2. Upgrade to Python 3.14
 
 **Rationale:**  
-Upgrading to Python 3.12 ensures long-term support, access to the latest features, and improved security.
+Upgrading to Python 3.14 ensures current language/runtime support and improved security.
 
 **Implementation Steps:**  
-- Update codebase to be compatible with Python 3.12.
+- Update codebase to be compatible with Python 3.14.
 - Update dependencies as needed.
 - Test the application thoroughly in the new environment.
 

@@ -8,58 +8,73 @@ Video Demo - [Here](https://youtu.be/8ZbkkKt7Sns)
 
 ### Prerequisites
 
-This app was built with the following:
+This app is modernized to run with:
 
 ```
-Ubuntu 20.04
-Python 3.8
+Ubuntu 24.04 (container base)
+Python 3.14
+uv (dependency lock/install)
+Podman (OCI runtime)
 ```
 
 You will need to setup a [Nessus scanner](https://www.tenable.com/products/nessus), and have at least one scan result.
 
-Additionally, you will need to setup a [RedisLabs](https://redislabs.com/try-free/) account
+Redis is optional. If `SESSION_TYPE=redis`, set `REDIS_URI`; otherwise use `SESSION_TYPE=filesystem` for a self-contained local/container runtime.
 
 ### Installing
 
-Clone the application (git clone or download and unpack the zip) and create your virtual environment (or install Poetry and use `poetry shell`)
-
-Install the dependencies
+Clone the application, then lock and sync dependencies with `uv`:
 
 ```
-pip install -r requirements.txt
+uv lock
+uv sync --frozen
 ```
 
-Run the setup script
+Generate `.env`:
 
 ```
 python setup.py
 ```
 
-Answer the prompts to configure the .env file
-
-In case you want to create this file manually, use the below template (DEV_DATABASE_URI is optional)
+Or create it manually (DEV_DATABASE_URI optional):
 
 ```
-SECRET_KEY=<RANDOM_STRING>
+SECRET_KEY=<RANDOM_HEX_STRING>
 FLASK_APP=wsgi.py
 PROD_DATABASE_URI=sqlite:////<FULL_PATH_TO_FILE>
 DEV_DATABASE_URI=sqlite:////<FULL_PATH_TO_FILE>
-SESSION_TYPE=redis
-REDIS_URI=redis://:[password]@[host_url]:[port]
+SESSION_TYPE=filesystem
+# If using redis sessions instead:
+# SESSION_TYPE=redis
+# REDIS_URI=redis://:[password]@[host_url]:[port]
 NESSUS_URL=https://<NESSUS_SCANNER_IP>:8834
 NESSUS_USER=<SCANNER_USERNAME>
 NESSUS_PASS=<SCANNER_PASSWORD>
+NESSUS_VERIFY_SSL=false
+SESSION_TYPE=cachelib
+SESSION_CACHE_DIR=/tmp/flask_session
 ```
 
-Start the server
+Run locally:
 
-```
-python wsgi.py
-```
+`uv run python wsgi.py`
+
+Run tests:
+
+`uv run pytest`
 
 ### Deployment
 
-You can pass this app to [Gunicorn_3](https://gunicorn.org/), [uWSGI](https://uwsgi-docs.readthedocs.io/en/latest/), [Waitress](https://docs.pylonsproject.org/projects/waitress/en/latest/), etc. and for extending usage, install [tmux](https://github.com/tmux/tmux/wiki) and start the server from there. When you disconnect the tmux session, the web app will be running in the background.
+Build and run with Podman:
+
+```
+podman build -t nessus-visualizer:py314 -f Containerfile .
+podman run --rm -d --name nessus-visualizer -p 5000:5000 --env-file .env nessus-visualizer:py314
+curl -fsS http://127.0.0.1:5000/login
+podman rm -f nessus-visualizer
+```
+
+The container runs as a non-root user and serves the app with Waitress on port `5000`.
 
 ## Usage
 

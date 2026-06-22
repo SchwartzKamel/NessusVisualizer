@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, logout_user, current_user, login_user
 from werkzeug.security import check_password_hash
 from datetime import datetime as dt
+from sqlalchemy import or_
 from .forms import SignupForm, LoginForm
 from .models import db, User
 from . import login_manager
@@ -53,10 +54,11 @@ def register():
         email = request.form.get('email')
         if username and email:
             existing_user = User.query.filter(
-                User.username == username or User.email == email
+            or_(User.username == username, User.email == email)
             ).first()
             if existing_user:
                 flash('A user already exists with that email address or username.')
+                return redirect(url_for('auth_bp.register'))
             new_user = User(
                 username=username,
                 email=email,

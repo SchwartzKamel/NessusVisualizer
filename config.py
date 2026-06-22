@@ -2,6 +2,7 @@
 from os import environ, path
 from dotenv import load_dotenv
 import redis
+from cachelib.file import FileSystemCache
 
 # Load variables from .env
 basedir = path.abspath(path.dirname(__file__))
@@ -21,8 +22,18 @@ class Config:
     TEMPLATES_FOLDER = 'templates'
 
     # Flask-Session
-    SESSION_TYPE = environ.get('SESSION_TYPE')
-    SESSION_REDIS = redis.from_url(environ.get('REDIS_URI'))
+    SESSION_TYPE = environ.get('SESSION_TYPE', 'cachelib')
+    REDIS_URI = environ.get('REDIS_URI')
+    SESSION_CACHE_DIR = environ.get(
+        'SESSION_CACHE_DIR',
+        environ.get('SESSION_FILE_DIR', '/tmp/flask_session')
+    )
+    SESSION_CACHELIB = (
+        FileSystemCache(cache_dir=SESSION_CACHE_DIR)
+        if SESSION_TYPE in {'filesystem', 'cachelib'}
+        else None
+    )
+    SESSION_REDIS = redis.from_url(REDIS_URI) if REDIS_URI else None
 
 
 class ProdConfig(Config):
@@ -30,7 +41,10 @@ class ProdConfig(Config):
     FLASK_ENV = 'production'
     DEBUG = False
     TESTING = False
-    SQLALCHEMY_DATABASE_URI = environ.get('PROD_DATABASE_URI')
+    SQLALCHEMY_DATABASE_URI = environ.get(
+        'PROD_DATABASE_URI',
+        'sqlite:///' + path.join(basedir, 'nessus_visualizer.db')
+    )
     SQLALCHEMY_ECHO = True
 
 
@@ -39,6 +53,9 @@ class DevConfig(Config):
     FLASK_ENV = 'development'
     DEBUG = True
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = environ.get('DEV_DATABASE_URI')
+    SQLALCHEMY_DATABASE_URI = environ.get(
+        'DEV_DATABASE_URI',
+        'sqlite:///' + path.join(basedir, 'nessus_visualizer.db')
+    )
     SQLALCHEMY_ECHO = True
     TEMPLATES_AUTO_RELOAD = True
